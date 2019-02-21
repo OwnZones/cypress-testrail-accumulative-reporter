@@ -54,6 +54,8 @@ it("Can authenticate a valid userC123", ...
 
 **runName**: _string_ (optional) name of the Testrail run.
 
+or
+
 **runId**: _string_ (optional) id of the Testrail run (should you want to rerun some of the test without creating a new run).
 
 ## TestRail Settings
