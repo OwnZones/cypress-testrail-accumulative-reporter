@@ -1,5 +1,5 @@
 {
-  "name": "cypress-testrail-accumulative-reporter",
+  "name": "@ownzones/cypress-testrail-accumulative-reporter",
   "version": "1.1.5",
   "description": "A Testrail reporter for cypress including TestRail API basic library",
   "main": "index.js",
