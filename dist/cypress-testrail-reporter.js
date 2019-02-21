@@ -29,47 +29,74 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         _this.validate(reporterOptions, 'projectId');
         _this.validate(reporterOptions, 'suiteId');
         runner.on('start', function () {
-            var executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
-            var name = (reporterOptions.runName || 'Automated test run') + " " + executionDateTime;
-            var description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
-            _this.testRail.createRun(name, description);
+            if (reporterOptions.runId) {
+                _this.testRail.setRunId(reporterOptions.runId);
+            }
+            else {
+                var name_1 = "" + (reporterOptions.runName || 'Automated test run');
+                var description_1 = moment().format('MMM Do YYYY, HH:mm (Z)');
+                _this.testRail.getActiveRunId(name_1).then(function (res) {
+                    if (!res) {
+                        _this.testRail.createRun(name_1, description_1);
+                    }
+                });
+            }
         });
         runner.on('pass', function (test) {
             var caseIds = shared_1.titleToCaseIds(test.title);
+            // if (caseIds.length > 0) {
+            //     const results = caseIds.map(caseId => {
+            //         return {
+            //             case_id: caseId,
+            //             status_id: Status.Passed,
+            //             comment: `Execution time: ${test.duration}ms`,
+            //         };
+            //     });
+            //     this.results.push(...results);
+            // }
             if (caseIds.length > 0) {
-                var results = caseIds.map(function (caseId) {
-                    return {
-                        case_id: caseId,
-                        status_id: testrail_interface_1.Status.Passed,
-                        comment: "Execution time: " + test.duration + "ms",
-                    };
-                });
-                (_a = _this.results).push.apply(_a, results);
+                var result = {
+                    case_id: caseIds[0],
+                    status_id: testrail_interface_1.Status.Passed,
+                    comment: "Execution time: " + test.duration + "ms",
+                };
+                _this.testRail.publishResult(result);
             }
-            var _a;
         });
         runner.on('fail', function (test) {
             var caseIds = shared_1.titleToCaseIds(test.title);
+            // if (caseIds.length > 0) {
+            //     const results = caseIds.map(caseId => {
+            //         return {
+            //             case_id: caseId,
+            //             status_id: Status.Failed,
+            //             comment: `${test.err.message.replace(/'/g,'')}`,
+            //         };
+            //     });
+            //     this.results.push(...results);
+            // }
             if (caseIds.length > 0) {
-                var results = caseIds.map(function (caseId) {
-                    return {
-                        case_id: caseId,
-                        status_id: testrail_interface_1.Status.Failed,
-                        comment: "" + test.err.message,
-                    };
-                });
-                (_a = _this.results).push.apply(_a, results);
+                var result = {
+                    case_id: caseIds[0],
+                    status_id: testrail_interface_1.Status.Failed,
+                    comment: "" + test.err.message.replace(/'/g, ''),
+                };
+                _this.testRail.publishResult(result);
             }
-            var _a;
         });
         runner.on('end', function () {
-            if (_this.results.length == 0) {
-                console.log('\n', chalk.magenta.underline.bold('(TestRail Reporter)'));
-                console.warn('\n', 'No testcases were matched. Ensure that your tests are declared correctly and matches Cxxx', '\n');
-               // _this.testRail.deleteRun();
-                return;
-            }
-            _this.testRail.publishResults(_this.results);
+            // if (this.results.length == 0) {
+            //     console.log('\n', chalk.magenta.underline.bold('(TestRail Reporter)'));
+            //     console.warn(
+            //         '\n',
+            //         'No testcases were matched. Ensure that your tests are declared correctly and matches Cxxx. Test run will be deleted',
+            //         '\n'
+            //     );
+            //     this.testRail.deleteRun();
+            //     return;
+            // }
+            // this.testRail.publishResults(this.results);
+            console.log('\n', chalk.magenta.underline.bold('Testrail upload results: Finished'));
         });
         return _this;
     }
