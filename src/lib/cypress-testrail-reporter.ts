@@ -36,6 +36,10 @@ export class CypressTestRailReporter extends reporters.Spec {
             }
         });
 
+        runner.on('test', test => {
+            console.log('\n', `Starting run for ${chalk.magenta(test.title)}`);
+        });
+
         runner.on('pass', test => {
             const caseIds = titleToCaseIds(test.title);
             // if (caseIds.length > 0) {
