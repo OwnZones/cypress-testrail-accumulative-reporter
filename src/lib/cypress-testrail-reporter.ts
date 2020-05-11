@@ -2,8 +2,11 @@ import {reporters} from 'mocha';
 import * as moment from 'moment';
 import {TestRail} from './testrail';
 import {titleToCaseIds} from './shared';
-import {Status, TestRailResult} from './testrail.interface';
+import {Status, TestRailResult, manualRevisionScripts} from './testrail.interface';
 
+const process = require('process');
+const path = require('path');
+const fs = require('fs')
 const chalk = require('chalk');
 
 export class CypressTestRailReporter extends reporters.Spec {
@@ -42,22 +45,16 @@ export class CypressTestRailReporter extends reporters.Spec {
 
         runner.on('pass', test => {
             const caseIds = titleToCaseIds(test.title);
-            // if (caseIds.length > 0) {
-            //     const results = caseIds.map(caseId => {
-            //         return {
-            //             case_id: caseId,
-            //             status_id: Status.Passed,
-            //             comment: `Execution time: ${test.duration}ms`,
-            //         };
-            //     });
-            //     this.results.push(...results);
-            // }
             if (caseIds.length > 0) {
-                const result = {
-                    case_id: caseIds[0],
-                    status_id: Status.Passed,
-                    comment: `Execution time: ${test.duration}ms`,
-                };
+                const resultPath = path.join(process.cwd(), 'cypress', 'fixtures', 'temporary_files', `${caseIds}.json`),
+                    data = fs.existsSync(resultPath) ? JSON.stringify(JSON.parse(fs.readFileSync(resultPath))) : '',
+                    comment = `Execution time: ${test.duration}ms\n${data}`,
+                    status_id = data ? Status.InProgress : Status.Passed,
+                    result = {
+                        case_id: caseIds[0],
+                        status_id,
+                        comment,
+                    };
                 this.testRail.publishResult(result);
             }
         });
@@ -78,7 +75,10 @@ export class CypressTestRailReporter extends reporters.Spec {
                 const result = {
                     case_id: caseIds[0],
                     status_id: Status.Failed,
-                    comment: `${test.err.message.replace(/'/g, '')}`,
+                    comment: `${test.err.message.replace(/'/g, '')}\n
+                    ${__dirname}\n
+                    ${process.cwd()}\n
+                    ${require.main.filename}`,
                 };
                 this.testRail.publishResult(result);
             }

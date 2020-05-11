@@ -15,6 +15,9 @@ var moment = require("moment");
 var testrail_1 = require("./testrail");
 var shared_1 = require("./shared");
 var testrail_interface_1 = require("./testrail.interface");
+var process = require('process');
+var path = require('path');
+var fs = require('fs');
 var chalk = require('chalk');
 var CypressTestRailReporter = /** @class */ (function (_super) {
     __extends(CypressTestRailReporter, _super);
@@ -42,23 +45,16 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                 });
             }
         });
+        runner.on('test', function (test) {
+            console.log('\n', "Starting run for " + chalk.magenta(test.title));
+        });
         runner.on('pass', function (test) {
             var caseIds = shared_1.titleToCaseIds(test.title);
-            // if (caseIds.length > 0) {
-            //     const results = caseIds.map(caseId => {
-            //         return {
-            //             case_id: caseId,
-            //             status_id: Status.Passed,
-            //             comment: `Execution time: ${test.duration}ms`,
-            //         };
-            //     });
-            //     this.results.push(...results);
-            // }
             if (caseIds.length > 0) {
-                var result = {
+                var resultPath = path.join(process.cwd(), 'cypress', 'fixtures', 'temporary_files', caseIds + ".json"), data = fs.existsSync(resultPath) ? JSON.stringify(JSON.parse(fs.readFileSync(resultPath))) : '', comment = "Execution time: " + test.duration + "ms\n" + data, status_id = data ? testrail_interface_1.Status.InProgress : testrail_interface_1.Status.Passed, result = {
                     case_id: caseIds[0],
-                    status_id: testrail_interface_1.Status.Passed,
-                    comment: "Execution time: " + test.duration + "ms",
+                    status_id: status_id,
+                    comment: comment,
                 };
                 _this.testRail.publishResult(result);
             }
@@ -79,7 +75,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                 var result = {
                     case_id: caseIds[0],
                     status_id: testrail_interface_1.Status.Failed,
-                    comment: "" + test.err.message.replace(/'/g, ''),
+                    comment: test.err.message.replace(/'/g, '') + "\n\n                    " + __dirname + "\n\n                    " + process.cwd() + "\n\n                    " + require.main.filename,
                 };
                 _this.testRail.publishResult(result);
             }

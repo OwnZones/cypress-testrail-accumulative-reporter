@@ -1,6 +1,6 @@
 {
   "name": "@ownzones/cypress-testrail-accumulative-reporter",
-  "version": "1.1.7",
+  "version": "1.2.0",
   "description": "A Testrail reporter for cypress including TestRail API basic library",
   "main": "index.js",
   "private": false,
@@ -32,7 +32,7 @@
     "btoa": "^1.1.2",
     "chalk": "^2.4.2",
     "mocha": "^5.2.0",
-    "moment": "^2.24.0"
+    "moment": "^2.25.3"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",

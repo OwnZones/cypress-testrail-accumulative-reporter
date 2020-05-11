@@ -13,6 +13,7 @@ export enum Status {
     Untested = 3,
     Retest = 4,
     Failed = 5,
+    InProgress = 6,
 }
 
 export interface TestRailResult {
@@ -20,6 +21,8 @@ export interface TestRailResult {
     status_id: Status;
     comment?: String;
 }
+
+export const manualRevisionScripts = [59124]
 
 export interface TestRailCase {
     id: number;
